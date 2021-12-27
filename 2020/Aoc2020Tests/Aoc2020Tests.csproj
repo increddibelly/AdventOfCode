@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentAssertions" Version="5.10.3" />
+    <PackageReference Include="NUnit" Version="3.12.0" />
+    <PackageReference Include="NUnit.ConsoleRunner" Version="3.11.1" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.16.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Day 04 passports\Day04 passports.csproj" />
+    <ProjectReference Include="..\Day05\Day05.csproj" />
+    <ProjectReference Include="..\Day06\Day06.csproj" />
+    <ProjectReference Include="..\Day07\Day07.csproj" />
+    <ProjectReference Include="..\Day08\Day08.csproj" />
+    <ProjectReference Include="..\Day09\Day09.csproj" />
+    <ProjectReference Include="..\Day10\Day10.csproj" />
+    <ProjectReference Include="..\Day11\Day11.csproj" />
+    <ProjectReference Include="..\Day12\Day12.csproj" />
+    <ProjectReference Include="..\Day13\Day13.csproj" />
+    <ProjectReference Include="..\Day14\Day14.csproj" />
+    <ProjectReference Include="..\Day15\Day15.csproj" />
+    <ProjectReference Include="..\Day16\Day16.csproj" />
+    <ProjectReference Include="..\Day17\Day17.csproj" />
+    <ProjectReference Include="..\Day1\Day01.csproj" />
+    <ProjectReference Include="..\Day2 Password Policy\Day02 Password Policy.csproj" />
+    <ProjectReference Include="..\Day3 Tree map\Day03 Tree map.csproj" />
+  </ItemGroup>
+
+</Project>
