@@ -1,6 +1,6 @@
 ﻿namespace AdventOfCode
 {
-    public class Day1
+    public class Day01
     {
         public List<List<int>> Parse(string input)
         {
@@ -21,7 +21,7 @@
             return numberList;
         }
 
-        public int Day1Part1(List<List<int>> input)
+        public int Day01Part1(List<List<int>> input)
         {
             return input.Select(group => group.Sum()).Max();
         }

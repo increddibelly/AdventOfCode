@@ -10,50 +10,50 @@ namespace Tests
         }
 
         [Test]
-        public void Day2Part1_Example()
+        public void Day02Part1_Example()
         {
-            var input = Input.Day2Example;
+            var input = Input.Day02Example;
 
-            var Day2 = new Day2();
-            var games = Day2.Parse(input);
+            var Day02 = new Day02();
+            var games = Day02.Parse(input);
 
-            var result = Day2.Day2Part1(games);
+            var result = Day02.Day02Part1(games);
             result.Should().Be(15);
         }
 
         [Test]
-        public void Day2Part1()
+        public void Day02Part1()
         {
-            var input = Input.Day2Input;
+            var input = Input.Day02Input;
 
-            var Day2 = new Day2();
-            var games = Day2.Parse(input);
+            var Day02 = new Day02();
+            var games = Day02.Parse(input);
 
-            var result = Day2.Day2Part1(games);
+            var result = Day02.Day02Part1(games);
             result.Should().Be(15);
         }
 
         [Test]
-        public void Day2Part2_Example()
+        public void Day02Part2_Example()
         {
-            var input = Input.Day2Example;
+            var input = Input.Day02Example;
 
-            var Day2 = new Day2();
-            var games = Day2.Parse(input);
+            var Day02 = new Day02();
+            var games = Day02.Parse(input);
 
-            var result = Day2.Day2Part2(games);
+            var result = Day02.Day02Part2(games);
             result.Should().Be(12);
         }
 
         [Test]
-        public void Day2Part2()
+        public void Day02Part2()
         {
-            var input = Input.Day2Input;
+            var input = Input.Day02Input;
 
-            var Day2 = new Day2();
-            var games = Day2.Parse(input);
+            var Day02 = new Day02();
+            var games = Day02.Parse(input);
 
-            var result = Day2.Day2Part2(games);
+            var result = Day02.Day02Part2(games);
             result.Should().Be(13433); // < 13937
         }
     }

@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Markup;
+﻿namespace AdventOfCode;
 
-namespace AdventOfCode;
-
-public class Day2
+public class Day02
 {
     const string Input_Rock = "A";
     const string Input_Paper = "B";
@@ -63,7 +56,7 @@ public class Day2
         return 0;
     }
 
-    public int Day2Part1(List<KeyValuePair<string, string>> input)
+    public int Day02Part1(List<KeyValuePair<string, string>> input)
     {
         var score = 0;
         foreach (var game in input)
@@ -75,7 +68,7 @@ public class Day2
         return score;
     }
 
-    public int Day2Part2(List<KeyValuePair<string, string>> input)
+    public int Day02Part2(List<KeyValuePair<string, string>> input)
     {
         var score = 0;
         foreach (var game in input)
