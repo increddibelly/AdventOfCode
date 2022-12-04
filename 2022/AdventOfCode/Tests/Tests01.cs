@@ -35,7 +35,7 @@ public class Test01 {
     [Test]
     public void Day01Part2_Example()
     {
-        var input = Input.Day01Input;
+        var input = Input.Day01Example;
 
         var Day01 = new Day01();
         var lists = Day01.Parse(input);
@@ -53,7 +53,7 @@ public class Test01 {
         var lists = Day01.Parse(input);
 
         var groups = lists.Select(x => x.Sum()).OrderByDescending(x => x).Take(3).ToArray();
-        groups.Sum().Should().Be(45000);
+        groups.Sum().Should().Be(199172);
     }
 
 }

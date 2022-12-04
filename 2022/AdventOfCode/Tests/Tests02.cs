@@ -30,7 +30,7 @@ namespace Tests
             var games = Day02.Parse(input);
 
             var result = Day02.Day02Part1(games);
-            result.Should().Be(15);
+            result.Should().Be(13484);
         }
 
         [Test]
