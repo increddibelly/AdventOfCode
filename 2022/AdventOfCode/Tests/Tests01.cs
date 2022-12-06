@@ -2,7 +2,7 @@ using AdventOfCode;
 
 namespace Tests;
 
-public class Test01 {
+public class Tests01 {
     [SetUp]
     public void Setup()
     {
