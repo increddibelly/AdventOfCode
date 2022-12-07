@@ -7725,4 +7725,13 @@ $ ls
     public static string Day10Example = @"";
     public static string Day10Input = @"";
 
+    public static string Day11Example = @"";
+    public static string Day11Input = @"";
+
+    public static string Day12Example = @"";
+    public static string Day12Input = @"";
+
+    public static string Day13Example = @"";
+    public static string Day13Input = @"";
+
 }
