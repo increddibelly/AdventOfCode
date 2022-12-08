@@ -45,7 +45,7 @@ namespace AdventOfCode
                                 }
                             }
 
-                            if (x == 0 || y == 0 || x == map.XSize || y == map.YSize)
+                            if (treeX == 0 || treeY == 0 || treeX == map.XSize || treeY == map.YSize)
                             {
                                 leftVisible = true; // may not be correct for the bottom right edges but the outcome is the same
                                 x = map.XSize;

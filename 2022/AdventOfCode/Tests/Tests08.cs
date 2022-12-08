@@ -11,7 +11,7 @@ public class Tests08
         var items = Day08.Parse(Input.Day08Example);
 
         var result = Day08.Day08Part1(items);
-        result.Should().Be(26);
+        result.Should().Be(21);
     }
 
     [Test]
