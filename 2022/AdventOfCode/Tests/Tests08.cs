@@ -1,4 +1,4 @@
-using AdventOfCode;
+﻿using AdventOfCode;
 
 namespace Tests;
 
@@ -21,26 +21,26 @@ public class Tests08
         var items = Day08.Parse(Input.Day08Input);
 
         var result = Day08.Day08Part1(items);
-        result.Should().Be(1337);
+        result.Should().Be(1859);
     }
 
+    [Test]
+    public void Day08Part2_Example()
+    {
+        var Day08 = new Day08();
+        var items = Day08.Parse(Input.Day08Example);
 
-    //public void Day08Part2_Example()
-    //{
-    //    var Day08 = new Day08();
-    //    var items = Day08.Parse(Input.Day08Example);
+        var result = Day08.Day08Part2(items);
+        result.Should().Be(8);
+    }
 
-    //    var result = Day08.Day08Part2(items);
-    //    result.Should().Be(1337);
-    //}
+    [Test]
+    public void Day08Part2()
+    {
+        var Day08 = new Day08();
+        var items = Day08.Parse(Input.Day08Input);
 
-    //[Test]
-    //public void Day08Part2()
-    //{
-    //    var Day08 = new Day08();
-    //    var items = Day08.Parse(Input.Day08Input);
-
-    //    var result = Day08.Day08Part2(items);
-    //    result.Should().Be(1337);
-    //}
+        var result = Day08.Day08Part2(items);
+        result.Should().Be(332640); //too high
+    }
 }

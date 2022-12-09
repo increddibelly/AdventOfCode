@@ -37,6 +37,7 @@ namespace AdventOfCode
                 foreach(var item in line)
                 {
                     map[x,y] = parser(item);
+                    x++;
                 }
                 x = 0;
                 y++;
@@ -60,6 +61,16 @@ namespace AdventOfCode
 
                 map[y][x] = value;
             }
+        }
+
+        public T[] Column(int x)
+        {
+            return map.Select(row => row[x]).ToArray();
+        }
+
+        public T[] Row(int y)
+        {
+            return map[y].ToArray();
         }
     }
 }

@@ -14,80 +14,118 @@ namespace AdventOfCode
         {
             var visibles = new List<Point>();
 
-            for (var treeX = 0; treeX < map.XSize; treeX++)
+            for (var treeY = 0; treeY < map.YSize; treeY++)
             {
-                for (var treeY = 0; treeY < map.YSize; treeY++)
+                for (var treeX = 0; treeX < map.XSize; treeX++)
                 {
                     var currentTreeHeight = map[treeX, treeY];
+                    var visible = false;
 
-                    var leftVisible = true; 
-                    var topVisible = true;
-                    var rightVisible = true; 
-                    var bottomVisible = true;
+                    var row = map.Row(treeY);
+                    var col = map.Column(treeX);
 
-                    for (var x = 0; x < map.XSize; x++)
+                    var x = 0;
+                    var y = 0;
+                    var xHeights = row.ToDictionary(h => x++, h => h);
+                    var yHeights = col.ToDictionary(h => y++, h => h);
+                    if (xHeights.Where(x => x.Key < treeX).All(x => x.Value < currentTreeHeight))
                     {
-                        for (var y = 0; y < map.XSize; y++)
-                        {
-                            if (treeX != x && treeY != y)
-                                continue; // we're checking diagonally. Don't. This is quicker than lots of complicated loops
-
-                            // check if there's ANY path to the edge
-
-                            if (x == treeX && y == treeY)
-                            {
-                                if (leftVisible || topVisible)
-                                {
-                                    // this one is visible from the top left area.
-                                    x = map.XSize;
-                                    y = map.YSize;
-                                    break;
-                                }
-                            }
-
-                            if (treeX == 0 || treeY == 0 || treeX == map.XSize || treeY == map.YSize)
-                            {
-                                leftVisible = true; // may not be correct for the bottom right edges but the outcome is the same
-                                x = map.XSize;
-                                y = map.YSize;
-                                break;
-                            }
-
-                            // start at edges, work way in
-                            if (map[x, y] >= currentTreeHeight)
-                            {
-                                if (x < treeX)
-                                {
-                                    leftVisible = false;
-                                    x = treeX; // skip a bit here
-                                }
-                                if (x > treeX)
-                                {
-                                    rightVisible = false;
-                                    x = map.XSize; // skip a bit here
-                                }
-
-                                if (y < treeX)
-                                {
-                                    topVisible = false;
-                                    y = treeY; // skip a bit here
-                                }
-                                if (y > treeY)
-                                {
-                                    bottomVisible = false;
-                                    y = map.YSize; // skip a bit here
-                                }
-                            }
-                        }
+                        // visible from Left;
+                        visible = true;
                     }
-                    
-                    if (leftVisible || rightVisible || topVisible || bottomVisible) 
+                    if (xHeights.Where(x => x.Key > treeX).All(x => x.Value < currentTreeHeight))
                     {
-                        visibles.Add(new Point(treeX, treeY));
+                        // visible from Right;
+                        visible = true;
                     }
+                    if (yHeights.Where(y => y.Key < treeY).All(x => x.Value < currentTreeHeight))
+                    {
+                        // visible from Top;
+                        visible = true;
+                    }
+                    if (yHeights.Where(y => y.Key > treeY).All(x => x.Value < currentTreeHeight))
+                    {
+                        // visible from Bottom;
+                        visible = true;
+                    }
+
+                    if (visible)
+                    {
+                        visibles.Add(new Point(x, y));
+                        continue;
+                    }
+
+                    // 3 0 3 7 3 = + + + + +
+                    // 2 5 5 1 2 = + + + - +
+                    // 6 5 3 3 2 = + + - + +
+                    // 3 3 5 4 9 = + - + - +
+                    // 3 5 3 9 0 = + + + + +
                 }
             }
+            visibles = visibles.OrderBy(x => x.Y).ToList();
             return visibles.Count;
+        }
+
+        public int Day08Part2(Map<int> map)
+        {
+            var bestView = 0;
+
+            for (var treeY = 0; treeY < map.YSize; treeY++)
+            {
+                for (var treeX = 0; treeX < map.XSize; treeX++)
+                {
+                    var currentTreeHeight = map[treeX, treeY];
+                    var visible = false;
+
+                    var row = map.Row(treeY);
+                    var col = map.Column(treeX);
+
+                    var x = 0;
+                    var y = 0;
+                    var xHeights = row.ToDictionary(h => x++, h => h);
+                    var yHeights = col.ToDictionary(h => y++, h => h);
+
+                    var viewLeft = 0;
+                    var viewRight = 0;
+                    var viewTop = 0;
+                    var viewBottom = 0;
+
+                    for (x = treeX-1; x >= 0; x--)
+                    {
+                        viewLeft++;
+                        if (xHeights[x] >= currentTreeHeight) break;
+                    }
+
+                    for (x = treeX+1; x < xHeights.Count; x++)
+                    {
+                        viewRight++;
+                        if (xHeights[x] >= currentTreeHeight) break;
+                    }
+
+                    for (y = treeY-1; y >= 0; y--)
+                    {
+                        viewTop++;
+                        if (yHeights[y] >= currentTreeHeight) break;
+                    }
+
+                    for (y = treeY+1; y < yHeights.Count; y++)
+                    {
+                        viewBottom++;
+                        if (yHeights[y] >= currentTreeHeight) break;
+                    }
+
+                    var score = viewLeft * viewRight * viewTop * viewBottom;
+                    if (score > bestView)
+                        bestView = score;
+
+                    // 3 0 3 7 3 = + + + + +
+                    // 2 5 5 1 2 = + + + - +
+                    // 6 5 3 3 2 = + + - + +
+                    // 3 3 5 4 9 = + - + - +
+                    // 3 5 3 9 0 = + + + + +
+                }
+            }
+            return bestView;
         }
 
         public int Day08Part2(string[] input)
