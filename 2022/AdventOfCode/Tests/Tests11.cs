@@ -28,16 +28,15 @@ public class Tests11
         var Day11 = new Day11();
 
         var result = Day11.Day11Part2(Input.Day11Example);
-        result.Should().Be(0);
+        result.Should().Be(2713310158);
     }
 
     [Test]
     public void Day11Part2()
     {
-        //var Day11 = new Day11();
-        //var items = Day11.Parse(Input.Day11Input);
+        var Day11 = new Day11();
 
-        //var result = Day11.Day11Part2(items);
-        //result.Should().Be(0);
+        var result = Day11.Day11Part2(Input.Day11Input);
+        result.Should().Be(24389045529);
     }
 }

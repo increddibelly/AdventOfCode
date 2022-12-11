@@ -41,6 +41,6 @@ public class Tests09
         var items = Day09.Parse(Input.Day09Input);
 
         var result = Day09.Day09Part2(items);
-        result.Should().Be(1337);
+        result.Should().Be(2665);
     }
 }

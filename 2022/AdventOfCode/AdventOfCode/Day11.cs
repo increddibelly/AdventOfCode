@@ -1,4 +1,6 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.Metrics;
+using System.Text;
 
 namespace AdventOfCode;
 
@@ -12,7 +14,7 @@ public class Day11
             .ToArray();
     }
 
-    public int Day11Part1(string input)
+    public long Day11Part1(string input)
     {
         var monkeys = Parse(input).ToDictionary(x => x.Id);
 
@@ -38,46 +40,108 @@ public class Day11
 
         return mostActive[0].Activity * mostActive[1].Activity;
     }
-    public int Day11Part2(string input)
+
+    public long Day11Part2(string input)
     {
-        var items = Parse(input);
-        return 0;
+        var breakpoints = new[] { 0, 19, 999, 8999, 9999 };
+
+        var monkeys = Parse(input).ToDictionary(x => x.Id);
+
+        var commonDenominator = MyMath.GreatestCommonDenominator(monkeys.Select(x => x.Value.Divisor).ToArray());
+
+        for (var i = 0; i < 10000; i++)
+        {
+            foreach (var monkey in monkeys.Values)
+            {
+                var thrown = monkey.Turn(false);
+                foreach (var items in thrown)
+                {
+                    foreach(var item in items.Value)
+                    {
+                        var smallItem = item % commonDenominator;
+                        monkeys[items.Key].Add(smallItem);
+                    }
+                }
+            }
+
+            if (breakpoints.Contains(i))
+            {
+                Debug.WriteLine($"Turn {i + 1}:");
+                foreach (var monkey in monkeys)
+                {
+                    Debug.WriteLine(monkey.Value.ToString());
+                }
+            }
+            //== After round 1000 ==
+            //Monkey 0 inspected items 5204 times.
+            //Monkey 1 inspected items 4792 times.
+            //Monkey 2 inspected items 199 times.
+            //Monkey 3 inspected items 5192 times.
+        }
+
+        var mostActive = monkeys.Values.OrderByDescending(m => m.Activity).Take(2).ToArray();
+
+        return mostActive[0].Activity * mostActive[1].Activity;
     }
 }
 
+internal static class MyMath
+{
+    static long GCD(long n1, long n2)
+    {
+        if (n2 == 0)
+        {
+            return n1;
+        }
+        else
+        {
+            return GCD(n2, n1 % n2);
+        }
+    }
+
+    public static long GreatestCommonDenominator(params long[] numbers)
+    {
+        return numbers.Aggregate((S, val) => S * val / GCD(S, val));
+    }
+}
+
+
 public class Monkey
 {
-    public List<int> _items = new List<int>();
+    public List<long> _items = new List<long>();
 
-    public int Id;
-    public int Activity = 0;
+    public long Id;
+    public long Activity = 0;
 
-    private Func<int, int> Operation;
-    private int Divisor;
-    private int TargetIfTrue;
-    private int TargetIfFalse;
+    private Func<long, long> Operation;
+    public long Divisor;
+    private long TargetIfTrue;
+    private long TargetIfFalse;
 
-    public void Add(int i)
+    public void Add(long i)
     {
         _items.Add(i);
     }
 
-    public void AddRange(IEnumerable<int> i)
+    public void AddRange(IEnumerable<long> i)
     {
         _items.AddRange(i);
     }
 
-    public Dictionary<int, List<int>> Turn()
+    public Dictionary<long, List<long>> Turn(bool divide = true)
     {
-        var output = new Dictionary<int, List<int>>();
+        var output = new Dictionary<long, List<long>>();
         
         foreach (var item in _items)
         {
             Activity++; // inspected items X times    
 
             var result = Operation(item);
-            
-            result = result / 3; // trunc to int
+
+            if (divide)
+            {
+                result = result / 3; // trunc to long
+            } 
 
             var key = (result % Divisor == 0)
                 ? TargetIfTrue
@@ -85,7 +149,7 @@ public class Monkey
 
             if (!output.ContainsKey(key))
             {
-                output.Add(key, new List<int>());
+                output.Add(key, new List<long>());
             }
             output[key].Add(result);
         }
@@ -108,13 +172,13 @@ If false: throw to monkey 3
         var monkey = new Monkey();
 
         var id = input[0].Replace("Monkey ", "").Replace(":", "");
-        monkey.Id = int.Parse(id);
+        monkey.Id = long.Parse(id);
 
         var startingItems = input[1].Replace("Starting items: ", "").Split(",");
-        monkey._items = startingItems.Select(int.Parse).ToList();
+        monkey._items = startingItems.Select(long.Parse).ToList();
 
         var ops = input[2].Replace("Operation: new = old ", "").Split(" ").Skip(2).ToArray();
-        if (int.TryParse(ops[1], out var operand)) {
+        if (long.TryParse(ops[1], out var operand)) {
             switch (ops[0])
             {
                 case "+": monkey.Operation = (old) => old += operand; break;
@@ -140,19 +204,19 @@ If false: throw to monkey 3
         }
 
         var div = input[3].Replace("Test: divisible by ", "");
-        monkey.Divisor = int.Parse(div);
+        monkey.Divisor = long.Parse(div);
 
         var throw_true = input[4].Replace("If true: throw to monkey ", "");
-        monkey.TargetIfTrue = int.Parse(throw_true);
+        monkey.TargetIfTrue = long.Parse(throw_true);
 
         var throw_false = input[5].Replace("If false: throw to monkey ", "");
-        monkey.TargetIfFalse = int.Parse(throw_false);
+        monkey.TargetIfFalse = long.Parse(throw_false);
 
         return monkey;
     }
 
     public override string ToString()
     {
-        return $"Monkey{Id}: {(string.Join(", ", _items))}";
+        return $"Monkey{Id}: {Activity}, {(string.Join(", ", _items))}";
     }
 }

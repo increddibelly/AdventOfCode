@@ -48,11 +48,11 @@ public class Tests10
 
         var result = Day10.Day10Part2(items, " ");
         result.Should().Be(
-           @"#### ###   ##  ###  #### ###   ##    ##" + Environment.NewLine +  
-            "#    #  # #  # #  # #    #  # #  #    #" + Environment.NewLine + 
-            "###  #  # #    #  # ###  #  # #       #" + Environment.NewLine + 
-            "#    ###  #    ###  #    ###  #       #" + Environment.NewLine +
-            "#    # #  #  # # #  #    #    #  # #  #" + Environment.NewLine +
-            "#### #  #  ##  #  # #### #     ##   ## ");
+           @"#### ###   ##  ###  #### ###   ##    ## " + Environment.NewLine +  
+            "#    #  # #  # #  # #    #  # #  #    # " + Environment.NewLine + 
+            "###  #  # #    #  # ###  #  # #       # " + Environment.NewLine + 
+            "#    ###  #    ###  #    ###  #       # " + Environment.NewLine +
+            "#    # #  #  # # #  #    #    #  # #  # " + Environment.NewLine +
+            "#### #  #  ##  #  # #### #     ##   ##  ");
     }
 }
