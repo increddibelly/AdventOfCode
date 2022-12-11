@@ -47,6 +47,12 @@ public class Tests10
         var items = Day10.Parse(Input.Day10Input);
 
         var result = Day10.Day10Part2(items, " ");
-        result.Should().Be("");
+        result.Should().Be(
+           @"#### ###   ##  ###  #### ###   ##    ##" + Environment.NewLine +  
+            "#    #  # #  # #  # #    #  # #  #    #" + Environment.NewLine + 
+            "###  #  # #    #  # ###  #  # #       #" + Environment.NewLine + 
+            "#    ###  #    ###  #    ###  #       #" + Environment.NewLine +
+            "#    # #  #  # # #  #    #    #  # #  #" + Environment.NewLine +
+            "#### #  #  ##  #  # #### #     ##   ## ");
     }
 }
