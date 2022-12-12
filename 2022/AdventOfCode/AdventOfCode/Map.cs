@@ -121,5 +121,42 @@ namespace AdventOfCode
                 }
             }
         }
+
+        public IEnumerable<Point> RingAround(Point p, int radius = 1)
+        {
+            for (var x = -radius; x <= radius; x++)
+            {
+                if (x >= 0 && x < XSize && p.Y - radius >= 0 && p.Y - radius < YSize)
+                    yield return new Point(p.X + x, p.Y - radius);
+                if (x >= 0 && x < XSize && p.Y + radius >= 0 && p.Y - radius < YSize)
+                    yield return new Point(p.X + x, p.Y - radius);
+
+                continue;
+                if (x >= XSize || p.Y - radius >= YSize || p.Y + radius >= YSize)
+                    continue;
+
+                yield return new Point(p.X + x, p.Y - radius);
+                yield return new Point(p.X + x, p.Y + radius);
+            }
+
+            y = p.Y + radius;
+            for (var x = -radius; x <= radius; x++)
+            {
+                if (x < 0 || y < 0)
+                    continue;
+                if (x >= XSize || y >= YSize)
+                    continue;
+
+
+                yield return new Point(p.X + x, p.Y + y);
+            }
+
+            for (var y = -radius; y <= radius; y++)
+            {
+                var row = new List<Point>();
+
+                
+            }
+        }
     }
 }

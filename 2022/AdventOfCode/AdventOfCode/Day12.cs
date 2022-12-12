@@ -51,6 +51,7 @@ public class Day12
         do
         {
             var current = End;
+            Point? next = Start;
             var area = _height.PointsAround(current);
             
             // try and figure out the unknowns
@@ -59,7 +60,24 @@ public class Day12
             // figure the cheapest path to each of these, filling the map
             foreach(var point in area)
             {
+                next = null;
                 var options = GetCheapestPathsFrom(point);
+                foreach(var option in options)
+                {
+                    if (CanMove(point, option.Key))
+                    {
+                        // there is A route from the current point to the cheapest point.
+                        _cheapestPath[point] = option.Value + 1;
+                        next = option.Key;
+                        break;
+                    } else
+                    {
+                        // what does this mean logically?
+                        continue;
+                    }
+                }
+                if (next != null)
+                    break;
             }
 
             for (var y = -1; y <= 1; y++)
