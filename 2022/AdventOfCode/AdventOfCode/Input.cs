@@ -10256,4 +10256,10 @@ abaccccccccccaccaaaacccaaaaaaaaaaaaaaccccccaaaaaccccccccccccccccccccccccccccaaaa
     public static string Day13Example = @"";
     public static string Day13Input = @"";
 
+    public static string Day14Example = @"";
+    public static string Day14Input = @"";
+
+    public static string Day15Example = @"";
+    public static string Day15Input = @"";
+
 }
