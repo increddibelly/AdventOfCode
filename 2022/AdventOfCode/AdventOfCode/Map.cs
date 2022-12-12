@@ -1,4 +1,6 @@
 ﻿#nullable disable
+using System.Drawing;
+
 namespace AdventOfCode
 {
     public class Map<T>
@@ -24,10 +26,10 @@ namespace AdventOfCode
             }
         }
 
-        public static Map<T> Parse(string input, Func<char, T> parser, string? separator = null)
+        public static Map<T> Parse(string input, Func<char, T> parser, string? lineSeparator = null)
         {
-            separator = separator ?? Environment.NewLine;
-            var lines = input.Split(separator);
+            lineSeparator = lineSeparator ?? Environment.NewLine;
+            var lines = input.Split(lineSeparator);
             
             var map = new Map<T>(lines[0].Length, lines.Length);
             var x = 0;
@@ -63,6 +65,12 @@ namespace AdventOfCode
             }
         }
 
+        public T this[Point p]
+        {
+            get => this[p.X, p.Y];
+            set => this[p.X, p.Y] = value;
+        }
+
         public T[] Column(int x)
         {
             return map.Select(row => row[x]).ToArray();
@@ -71,6 +79,47 @@ namespace AdventOfCode
         public T[] Row(int y)
         {
             return map[y].ToArray();
+        }
+
+        public IEnumerable<Point> Find(T target)
+        {
+            var x = 0;
+            var y = 0;
+            foreach(var line in map)
+            {
+                foreach(var item in line)
+                {
+                    if (item.Equals(target))
+                    {
+                        yield return new Point(x, y);
+                    }
+                    x++;
+                }
+                y++;
+            }
+        }
+
+        public IDictionary<Point, T> Around(Point p, int radius = 1)
+        {
+            return PointsAround(p, radius).ToDictionary(xy => xy, xy => this[xy]);
+        }
+
+        public IEnumerable<Point> PointsAround(Point p, int radius = 1)
+        {
+            for (var y = -radius; y <= radius; y++)
+            {
+                var row = new List<Point>();
+
+                for (var x = -radius; x <= radius; x++)
+                {
+                    if (x < 0 || y < 0)
+                        continue;
+                    if (x >= XSize || y >= YSize)
+                        continue;
+
+                    yield return new Point(p.X + x, p.Y + y);
+                }
+            }
         }
     }
 }
