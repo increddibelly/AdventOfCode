@@ -95,6 +95,7 @@ namespace AdventOfCode
                     }
                     x++;
                 }
+                x = 0;
                 y++;
             }
         }
@@ -122,41 +123,36 @@ namespace AdventOfCode
             }
         }
 
-        public IEnumerable<Point> RingAround(Point p, int radius = 1)
+        public IEnumerable<Point> Adjacent(Point p)
         {
-            for (var x = -radius; x <= radius; x++)
+            var output = new HashSet<Point>();
+            output.Add(new Point(p.X, p.Y - 1));
+            output.Add(new Point(p.X, p.Y + 1));
+            output.Add(new Point(p.X - 1, p.Y));
+            output.Add(new Point(p.X + 1, p.Y));
+
+            return output
+                .Where(p => p.X >= 0 && p.Y >= 0)
+                .Where(p => p.X < XSize && p.Y < YSize);
+        }
+
+        public IEnumerable<Point> RingAround(Point p, int radius = 1, bool withinBounds = true)
+        {
+            var output = new HashSet<Point>();
+            for (var delta = 0; delta <= radius; delta++)
             {
-                if (x >= 0 && x < XSize && p.Y - radius >= 0 && p.Y - radius < YSize)
-                    yield return new Point(p.X + x, p.Y - radius);
-                if (x >= 0 && x < XSize && p.Y + radius >= 0 && p.Y - radius < YSize)
-                    yield return new Point(p.X + x, p.Y - radius);
-
-                continue;
-                if (x >= XSize || p.Y - radius >= YSize || p.Y + radius >= YSize)
-                    continue;
-
-                yield return new Point(p.X + x, p.Y - radius);
-                yield return new Point(p.X + x, p.Y + radius);
+                output.Add(new Point(p.X - radius + delta, p.Y - radius)); // top row
+                output.Add(new Point(p.X - radius + delta, p.Y + radius)); // bottom row
+                output.Add(new Point(p.X - radius, p.Y - radius + delta)); // left side
+                output.Add(new Point(p.X + radius, p.Y - radius + delta)); // right side
             }
+            output.Add(new Point(p.X + radius, p.Y + radius));
 
-            y = p.Y + radius;
-            for (var x = -radius; x <= radius; x++)
-            {
-                if (x < 0 || y < 0)
-                    continue;
-                if (x >= XSize || y >= YSize)
-                    continue;
-
-
-                yield return new Point(p.X + x, p.Y + y);
-            }
-
-            for (var y = -radius; y <= radius; y++)
-            {
-                var row = new List<Point>();
-
-                
-            }
+            return withinBounds
+                ? output
+                    .Where(p => p.X >= 0 && p.Y >= 0)
+                    .Where(p => p.X < XSize && p.Y < YSize)
+                : output;
         }
     }
 }

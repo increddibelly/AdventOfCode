@@ -4,130 +4,141 @@ namespace AdventOfCode;
 
 public class Day12
 {
-    private const int Unknown      = 9999999;
-    private const int NoDirectPath = 9996999;
+    private const int Unknown      = 9990999;
+    private const int NoDirectPath = 9991999;
 
     private Map<int> _height;
-    private Map<int> _cheapestPath;
-    private List<Point> _todo = new List<Point>();
-    private List<Point> _hard = new List<Point>();
+    private Map<int> _costMap;
     private Point Start;
     private Point End;
 
     private Map<int> Parse(string input)
     {
         _height = Map<int>.Parse(input, x => x);
-        _cheapestPath = Map<int>.Parse(input, x => Unknown);
+        _costMap = Map<int>.Parse(input, x => Unknown);
         Start = _height.Find('S').Single();
         End = _height.Find('E').Single();
 
+        _height[End] = (int)'z' + 2; // make math easier
+        _height[Start] = (int)'a' - 1; // make math easier
+
         // initialize the area around End
-        foreach(var from in _height.PointsAround(End))
-        {
-            if (CanMove(from, End))
-            {
-                _cheapestPath[from] = 1;
-            } else
-            {
-                _cheapestPath[from] = NoDirectPath;
-            }
-        }
-        _cheapestPath[End] = 0;
+        _costMap[End] = 0;
 
         return _height;
     }
 
+    private bool IsComputed(Point p) => Cost(p) < Unknown;
+    private int Cost(Point p) => _costMap[p];
+
+    private HashSet<Point> Discover(Point target)
+    {
+        var todo = new HashSet<Point>();
+        var area = _costMap.Adjacent(target);
+
+        foreach(var point in area)
+        {
+            if (IsComputed(point))
+            {
+                continue;
+            }
+
+            if (CanMove(point, target))
+            {
+                // found a path!
+                var cost = Cost(target) + 1;
+                if (Cost(point) > cost)
+                {
+                    _costMap[point] = cost;
+                }
+                // this point might work, (re)discover more!
+                todo.Add(point);
+            }
+            else
+            {
+                _costMap[point] = NoDirectPath; // for now
+                //todo.Add(point); // check again later
+                continue;
+            }
+        }
+
+        return todo.OrderBy(x => Cost(x)).ToHashSet();
+    }
+
     private bool CanMove(Point from, Point to)
     {
-        if (_height[from] <= _height[to] + 1)
+        // off axis
+        if (from.X != to.X && from.Y != to.Y)
+            return false;
+
+        // outside box
+        if (from.X < to.X - 1 || from.X > to.X + 1 ||
+            from.Y < to.Y - 1 || from.Y > to.Y + 1)
+            return false;
+
+        if (_height[from] == (int)'z')
             return true;
+
+        if (_height[from] +1 >= _height[to])
+            return true;
+
+        // too high
         return false;
     }
 
     public int Day12Part1(string input)
     {
-        var cost = Map<int>.Parse(input, x => -1);
-        
+        Parse(input);
+
+        var todo = Discover(End);
+        var morework = true;
+        var newTodo = new HashSet<Point>();
         do
         {
-            var current = End;
-            Point? next = Start;
-            var area = _height.PointsAround(current);
-            
-            // try and figure out the unknowns
-
-            // X figure out the current cheapest paths
-            // figure the cheapest path to each of these, filling the map
-            foreach(var point in area)
+            foreach (var point in todo)
             {
-                next = null;
-                var options = GetCheapestPathsFrom(point);
-                foreach(var option in options)
-                {
-                    if (CanMove(point, option.Key))
-                    {
-                        // there is A route from the current point to the cheapest point.
-                        _cheapestPath[point] = option.Value + 1;
-                        next = option.Key;
-                        break;
-                    } else
-                    {
-                        // what does this mean logically?
-                        continue;
-                    }
-                }
-                if (next != null)
-                    break;
+                var discoveries = Discover(point);
+                newTodo.AddRange(discoveries);
             }
 
-            for (var y = -1; y <= 1; y++)
-            {
-                for (var x = -1; x <= 1; x++)
-                {
-                    current = new Point(x, y);
-                    if (CanMove(current, End))
-                    {
-                        _cheapestPath[current] = 1;
-                    }
-                    else
-                    {
-                        _cheapestPath[current] = NoDirectPath;
-                    }
-                }
-            }
-        } while (current != Start);
+            todo.Clear();
+            todo.AddRange(newTodo);
+            newTodo.Clear();
 
+            morework = todo.Any();
+        } while (morework);
+        return _costMap[Start];
     }
 
-    private IDictionary<Point, int> GetCheapestPathsFrom(Point point)
-    {
-        return _cheapestPath.Around(point)
-            .OrderBy(x => x.Value)
-            .GroupBy(x => x.Value)
-            .First()
-            .ToDictionary(x => x.Key, x => x.Value);
-    }
+    //private IDictionary<Point, int> GetCheapestPathsFrom(Point point)
+    //{
+    //    return _cheapestPath.Around(point)
+    //        .OrderBy(x => x.Value)
+    //        .GroupBy(x => x.Value)
+    //        .First()
+    //        .ToDictionary(x => x.Key, x => x.Value);
+    //}
 
-    private void CheckRoute(Point current, Point target)
-    {
-        var area = map.Around(current);
-        var todo = new List<Point>();
-        for (var y = -1; y <= 1; y++)
-        {
-            for (var x = -1; x <= 1; x++)
-            {
-                current = new Point(x, y);
-                if (CanMove(current, End))
-                {
-                    // those around End cost 1 step to reach the end
-                    _cheapestPath[current] = 1;
-                }
-                else
-                {
-                    todo.Add(current);
-                    _cheapestPath[current] = NoDirectPath;
-                }
-            }
-        }
-    }
+    //private void CheckRoute(Point current, Point target)
+    //{
+    //    var area = map.Around(current);
+    //    var todo = new List<Point>();
+    //    for (var y = -1; y <= 1; y++)
+    //    {
+    //        for (var x = -1; x <= 1; x++)
+    //        {
+    //            current = new Point(x, y);
+    //            if (CanMove(current, End))
+    //            {
+    //                // those around End cost 1 step to reach the end
+    //                _cheapestPath[current] = 1;
+    //            }
+    //            else
+    //            {
+    //                todo.Add(current);
+    //                _cheapestPath[current] = NoDirectPath;
+    //            }
+    //        }
+    //    }
+    //}
 }

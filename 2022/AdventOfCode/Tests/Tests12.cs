@@ -1,59 +1,33 @@
-using AdventOfCode;
+﻿using AdventOfCode;
 
 namespace Tests;
 
-public class Tests12 {
-    [SetUp]
-    public void Setup()
-    {
-    }
-
+public class Tests12
+{
     [Test]
     public void Day12Part1_Example()
     {
-        var input = Input.Day12Example;
-
         var Day12 = new Day12();
-        var lists = Day12.Parse(input);
-
-        var result = Day12.Day12Part1(lists);
-        result.Should().Be(24000);
+        var result = Day12.Day12Part1(Input.Day12Example);
+        result.Should().Be(31);
     }
 
     [Test]
     public void Day12Part1()
     {
-        var input = Input.Day12Input;
-
         var Day12 = new Day12();
-        var lists = Day12.Parse(input);
 
-        var result = Day12.Day12Part1(lists);
-        result.Should().Be(66616);
+        var result = Day12.Day12Part1(Input.Day12Input);
+        result.Should().Be(352);
     }
 
     [Test]
     public void Day12Part2_Example()
     {
-        var input = Input.Day12Example;
-
-        var Day12 = new Day12();
-        var lists = Day12.Parse(input);
-
-        var groups = lists.Select(x => x.Sum()).OrderByDescending(x => x).Take(3).ToArray();
-        groups.Sum().Should().Be(45000);
     }
 
     [Test]
     public void Day12Part2()
     {
-        var input = Input.Day12Input;
-
-        var Day12 = new Day12();
-        var lists = Day12.Parse(input);
-
-        var groups = lists.Select(x => x.Sum()).OrderByDescending(x => x).Take(3).ToArray();
-        groups.Sum().Should().Be(199172);
     }
-
 }
