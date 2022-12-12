@@ -19,8 +19,8 @@ public class Day12
         Start = _height.Find('S').Single();
         End = _height.Find('E').Single();
 
-        _height[End] = (int)'z' + 2; // make math easier
-        _height[Start] = (int)'a' - 1; // make math easier
+        _height[End] = (int)'z'; // make math easier
+        _height[Start] = (int)'a'; // make math easier
 
         // initialize the area around End
         _costMap[End] = 0;
@@ -38,15 +38,19 @@ public class Day12
 
         foreach(var point in area)
         {
+            var cost = Cost(target) + 1;
             if (IsComputed(point))
             {
+                if (cost < Cost(point))
+                {
+                    break;
+                } 
                 continue;
             }
 
             if (CanMove(point, target))
             {
                 // found a path!
-                var cost = Cost(target) + 1;
                 if (Cost(point) > cost)
                 {
                     _costMap[point] = cost;
@@ -62,7 +66,7 @@ public class Day12
             }
         }
 
-        return todo.OrderBy(x => Cost(x)).ToHashSet();
+        return todo;
     }
 
     private bool CanMove(Point from, Point to)
@@ -95,7 +99,7 @@ public class Day12
         var newTodo = new HashSet<Point>();
         do
         {
-            foreach (var point in todo)
+            foreach (var point in todo.OrderBy(p => Cost(p)))
             {
                 var discoveries = Discover(point);
                 newTodo.AddRange(discoveries);
@@ -108,6 +112,15 @@ public class Day12
             morework = todo.Any();
         } while (morework);
         return _costMap[Start];
+    }
+    public int Day12Part2(string input)
+    {
+        Day12Part1(input);
+
+        return _height.Find('a')
+               .Select(point => _costMap[point])
+               .OrderBy(p => p)
+               .First();
     }
 
     //private IDictionary<Point, int> GetCheapestPathsFrom(Point point)
