@@ -8,6 +8,8 @@ namespace AdventOfCode;
 
 public class Day13
 {
+    private const string Numbers = "0123456789";
+
     private string[][] Parse(string input)
     {
         var groups = input.Split(Environment.NewLine+Environment.NewLine);
@@ -23,22 +25,62 @@ public class Day13
         for (var index = 0; index < pairs.Length; index++)
         {
             var pair = pairs[index];
-            var firstNumbers = pair[0].Replace("[", "").Replace("]", "").Split(",").Select(int.Parse).ToArray() ?? new[] {} ;
-            var secondNumbers = pair[1].Replace("[", "").Replace("]", "").Split(",")?.Select(int.Parse).ToArray();
 
-            if (CorrectOrder(firstNumbers, secondNumbers))
+            pair = Reconstruct(pair);
+
+            if (CorrectOrder(pair))
             {
                 correctOrders.Add(index + 1); // one based
-                continue;
             }
-
-
-            //if (CorrectOrder(pairs[index]))
-            //{
-            //    correctOrders.Add(index + 1); // one based
-            //}
         }
         return correctOrders.Sum();
+    }
+
+    private string[] Reconstruct(string[] pair)
+    {
+        var left = new StringBuilder(pair[0]);
+        var right = new StringBuilder(pair[1]);
+
+        var si = -1;
+        for(var i = 0; i<left.Length; i++)
+        {
+            if (++si >= right.Length - 1)
+                break;
+
+            var l = left[i];
+            var r = right[si];
+
+            if (l == r)
+                continue;
+
+            // upgrade a single number to a list with that number
+            if (l == '[')
+            {
+                right.Insert(si++, l);
+                while (Numbers.Contains(r))
+                {
+                    r = right[++si];
+                }
+                right.Insert(si, ']');
+            }
+
+            // upgrade a single number to a list with that number
+            if (r == '[')
+            {
+                left.Insert(i++, r);
+                while (Numbers.Contains(l))
+                {
+                    l = left[++i];
+                }
+                left.Insert(i, ']');
+            }
+        }
+
+        return new[]
+        {
+            left.ToString(),
+            right.ToString()
+        };
     }
 
     private bool CorrectOrder(int[] firstNumbers, int[] secondNumbers)
@@ -87,7 +129,7 @@ public class Day13
                 return false;
             }
 
-            if (second.Length == si + 1 && first.Length > i + 1)
+            if (si == second.Length - 1 && first.Length > i)
             {
                 // last index of second, but first still has more items
                 return false;
@@ -113,8 +155,7 @@ public class Day13
 
             if (secondValue == ']')
             {
-                // if first has a number and second is closing, first is larger
-                if (int.TryParse(firstValue.ToString(), out var _))
+                if (Numbers.Contains(firstValue) || first.Length > i)
                     return false;
                 // wait for second to close
                 i--;
@@ -123,28 +164,27 @@ public class Day13
 
             if (firstValue == ']')
             {
-                // if second has a number and first is closing, second is larger
-                if (int.TryParse(secondValue.ToString(), out var _))
+                if (Numbers.Contains(secondValue) || second.Length > si)
                     return true;
                 // wait for first to close
                 si--;
                 continue;
             }
 
-            //if (firstValue == ',')
-            //{
-            //    return false;
-            //}
+            if (firstValue == ',')
+            {
+                return false;
+            }
 
-            //if (secondValue == ',')
-            //{
-            //    return true;
-            //}
+            if (secondValue == ',')
+            {
+                return true;
+            }
 
             // now we get to the acutal numbers
-            var firstDigits = first.Skip(i).TakeWhile(c => "0123456789".Contains(c)).ToArray();
+            var firstDigits = first.Skip(i).TakeWhile(c => Numbers.Contains(c)).ToArray();
             var firstIsNumber = int.TryParse(new string(firstDigits), out var firstNumber);
-            var secondDigits = second.Skip(si).TakeWhile(c => "0123456789".Contains(c)).ToArray();
+            var secondDigits = second.Skip(si).TakeWhile(c => Numbers.Contains(c)).ToArray();
             var secondIsNumber = int.TryParse(new string(secondDigits), out var secondNumber);
 
             if (firstIsNumber && !secondIsNumber)
@@ -167,7 +207,7 @@ public class Day13
 
         // if second has ANY numbers left in whatever form, it is the larger one
         return
-            second.Skip(si).Any(c => "0123456789".Contains(c));
+            second.Length > si;
     }
 
     public int Day13Part2(string input)

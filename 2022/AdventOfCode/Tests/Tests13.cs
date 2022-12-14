@@ -23,7 +23,7 @@ public class Tests13
     public void Day13Part1()
     {
         var result = day13.Day13Part1(Input.Day13Input);
-        result.Should().Be(6394);
+        result.Should().Be(6214);
     }
 
     [Test]

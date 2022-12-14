@@ -7,20 +7,26 @@ namespace AdventOfCode
     {
         private List<List<T>> map = new List<List<T>>();
 
+        private readonly int XOffset = 0;
+        private readonly int YOffset = 0;
+
         public int XSize { get; protected set; }
         public int YSize { get; protected set; }
 
-        private Map(int xSize, int ySize)
+        public Map(int xSize, int ySize, int xOffset = 0, int yOffset = 0, T initial = default)
         {
             XSize = xSize;
             YSize = ySize;
+
+            XOffset = xOffset;
+            YOffset = yOffset;
 
             for(var i=0; i<YSize; i++)
             {
                 var list = new List<T>();
                 for(var x = 0; x<XSize; x++)
                 {
-                    list.Add(default);
+                    list.Add(initial);
                 }
                 map.Add(list);
             }
@@ -51,13 +57,17 @@ namespace AdventOfCode
         {
             get
             {
-                if (x < 0 || y < 0 || x > XSize || y > YSize)
+                x = x - XOffset;
+                y = y - YOffset;
+                if (x < 0 || y < 0 || x >= XSize || y >= YSize)
                     return default(T);
 
                 return map[y][x];
             }
             set
             {
+                x = x - XOffset;
+                y = y - YOffset;
                 if (x < 0 || y < 0 || x > XSize || y > YSize)
                     return;
 
@@ -73,12 +83,12 @@ namespace AdventOfCode
 
         public T[] Column(int x)
         {
-            return map.Select(row => row[x]).ToArray();
+            return map.Select(row => row[x-XOffset]).ToArray();
         }
 
         public T[] Row(int y)
         {
-            return map[y].ToArray();
+            return map[y-YOffset].ToArray();
         }
 
         public IEnumerable<Point> Find(T target)

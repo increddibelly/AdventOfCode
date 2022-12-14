@@ -16,14 +16,14 @@ public class Tests14
     public void Day14Part1_Example()
     {
         var result = day14.Day14Part1(Input.Day14Example);
-        result.Should().Be(10605);
+        result.Should().Be(25);
     }
 
     [Test]
     public void Day14Part1()
     {
         var result = day14.Day14Part1(Input.Day14Input);
-        result.Should().Be(56120);
+        result.Should().Be(656);
     }
 
     [Test]
