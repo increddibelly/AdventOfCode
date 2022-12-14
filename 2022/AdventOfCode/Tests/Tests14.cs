@@ -23,20 +23,20 @@ public class Tests14
     public void Day14Part1()
     {
         var result = day14.Day14Part1(Input.Day14Input);
-        result.Should().Be(656);
+        result.Should().Be(655);
     }
 
     [Test]
     public void Day14Part2_Example()
     {
         var result = day14.Day14Part2(Input.Day14Example);
-        result.Should().Be(1437);
+        result.Should().Be(93);
     }
 
     [Test]
     public void Day14Part2()
     {
         var result = day14.Day14Part2(Input.Day14Input);
-        result.Should().Be(1437);
+        result.Should().Be(1337);
     }
 }

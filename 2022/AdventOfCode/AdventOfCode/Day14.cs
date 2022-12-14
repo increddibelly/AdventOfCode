@@ -13,7 +13,7 @@ public class Day14
     private Point BottomLeft;
     private Point BottomRight;
 
-    private void Parse(string input)
+    private void Parse(string input, int horizontalMargin = 0, int verticalMargin = 0)
     {
         var lines = input.Split(Environment.NewLine);
         var pointsPerLine = lines
@@ -26,10 +26,10 @@ public class Day14
                 .Select(p => new Point(int.Parse(p[0]), int.Parse(p[1])))
                 .ToList());
         }
-        var minX = points.SelectMany(p => p.Select(q => q.X)).Min();
-        var maxX = points.SelectMany(p => p.Select(q => q.X)).Max();
+        var minX = points.SelectMany(p => p.Select(q => q.X)).Min() - horizontalMargin;
+        var maxX = points.SelectMany(p => p.Select(q => q.X)).Max() + horizontalMargin;
         var minY = points.SelectMany(p => p.Select(q => q.Y)).Min();
-        var maxY = points.SelectMany(p => p.Select(q => q.Y)).Max();
+        var maxY = points.SelectMany(p => p.Select(q => q.Y)).Max() + verticalMargin;
         BottomLeft = new Point(minX, maxY);
         BottomRight = new Point(maxX, maxY);
         var topLeft = new Point(minX - 1, -1);
@@ -41,46 +41,38 @@ public class Day14
 
     private void DrawLines(List<List<Point>> zigzags)
     {
-        foreach(var target in zigzags)
+        foreach(var targets in zigzags)
         {
-            var current = target[0];
-            for(var i = 1; i<target.Count; i++)
+            var current = targets[0];
+            for(var i = 1; i<targets.Count; i++)
             {
-                var x = current.X;
-                var y = current.Y;
-                for (x = current.X;
-                    x != target[i].X || y != target[i].Y; )
+                var target = targets[i];
+
+                while (current != target)
                 {
-                    for (y = current.Y; 
-                        y != target[i].Y || x != target[i].X; )
-                    {
-                        _map[x, y] = Rock;
-
-                        if (x != target[i].X)
-                        {
-                            x = Step(x, current.X, target[i].X);
-                        } else
-                        {
-                            if (y != target[i].Y)
-                            {
-                                y = Step(y, current.Y, target[i].Y);
-                            }
-                        }
-                    }
+                    _map[current] = Rock;
+                    current = Step(current, target);
                 }
-                _map[target[i].X, target[i].Y] = Rock;
-                current = target[i];
+                _map[target] = Rock;
+                current = target;
             }
-
-            _map[target.Last().X, target.Last().Y] = Rock;
         }
     }
 
-    private int Step(int x, int x1, int x2)
+    private Point Step(Point current, Point target)
     {
-        if (x2 > x1) return x + 1;
-        if (x2 < x1) return x - 1;
-        return x;
+        var x = Step(current.X, target.X);
+        var y = Step(current.Y, target.Y);
+        current.X = x;
+        current.Y = y;
+        return current;
+    }
+
+    private int Step(int x1, int x2)
+    {
+        if (x2 > x1) return x1 + 1;
+        if (x2 < x1) return x1 - 1;
+        return x1;
     }
 
     private bool WithinBounds(Point p)
@@ -137,18 +129,28 @@ public class Day14
         Parse(input);
         var grains = 0;
         var sand = new Point(500, 0);
-        do
+        while (WithinBounds(sand))
         {
             grains++;
             sand = DropSand();
             _map[sand] = Sand;
-        } while (WithinBounds(sand));
+        }
 
         return grains;
     }
 
     public int Day14Part2(string input)
     {
-        return 0;
+        Parse(input, 500, 1);
+        var grains = 0;
+        var sand = new Point(500, 0);
+        while (true)
+        {
+            grains++;
+            sand = DropSand();
+            _map[sand] = Sand;
+            if (sand.X == 500 && sand.Y == 0) 
+                return grains;
+        }
     }
 }
