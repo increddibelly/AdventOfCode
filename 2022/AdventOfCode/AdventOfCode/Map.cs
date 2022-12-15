@@ -13,6 +13,9 @@ namespace AdventOfCode
         public int XSize { get; protected set; }
         public int YSize { get; protected set; }
 
+        public bool AutoCorrection = true;
+        public bool Margin = false;
+
         public Map(int xSize, int ySize, int xOffset = 0, int yOffset = 0, T initial = default)
         {
             XSize = xSize;
@@ -57,8 +60,16 @@ namespace AdventOfCode
         {
             get
             {
-                x = x - XOffset;
-                y = y - YOffset;
+                if (AutoCorrection)
+                {
+                    x = x - XOffset;
+                    y = y - YOffset;
+                } else
+                if (Margin)
+                {
+                    x = x + XOffset;
+                    y = y + YOffset;
+                }
                 if (x < 0 || y < 0 || x >= XSize || y >= YSize)
                     return default(T);
 
@@ -66,9 +77,18 @@ namespace AdventOfCode
             }
             set
             {
-                x = x - XOffset;
-                y = y - YOffset;
-                if (x < 0 || y < 0 || x > XSize || y > YSize)
+                if (AutoCorrection)
+                {
+                    x = x - XOffset;
+                    y = y - YOffset;
+                }
+                else
+                if (Margin)
+                {
+                    x = x + XOffset;
+                    y = y + YOffset;
+                } 
+                if (x < 0 || y < 0 || x >= XSize || y >= YSize)
                     return;
 
                 map[y][x] = value;
@@ -83,12 +103,14 @@ namespace AdventOfCode
 
         public T[] Column(int x)
         {
-            return map.Select(row => row[x-XOffset]).ToArray();
+            x = AutoCorrection ? x - XOffset : x;
+            return map.Select(row => row[x]).ToArray();
         }
 
         public T[] Row(int y)
         {
-            return map[y-YOffset].ToArray();
+            y = AutoCorrection ? y - YOffset : y;
+            return map[y].ToArray();
         }
 
         public IEnumerable<Point> Find(T target)

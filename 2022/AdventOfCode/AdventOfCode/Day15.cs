@@ -9,7 +9,13 @@ namespace AdventOfCode;
 
 public class Day15
 {
+    private const char Empty = '.';
+    private const char InSensorRange = '#';
+    private const char Beacon = 'B';
+    private const char Sensor = 'S';
     private Map<char> _map;
+
+    private Point Origin;
 
     private Dictionary<Point, Point> _sensors = new Dictionary<Point, Point>();
 
@@ -18,16 +24,20 @@ public class Day15
         // Sensor at x=2, y=18: closest beacon is at x=-2, y=15
         var lines = input
             .Split(Environment.NewLine)
-            .Select(x => x.Replace("Sensor at x=", "")
+            .Select(x => x.Replace("Sensor at ", "")
+            .Replace("x=", "")
             .Replace("y=", "")
             .Replace(" closest beacon is at ", "")
             .Split(":"));
         foreach(var line in lines)
         {
+            var sensor = line[0].Split(",");
+            var beacon = line[1].Split(",");
+
             _sensors.Add(
-                new Point(int.Parse(line[0]), int.Parse(line[1])),
-                new Point(int.Parse(line[2]), int.Parse(line[3]))
-                );
+                new Point(int.Parse(sensor[0]), int.Parse(sensor[1])),
+                new Point(int.Parse(beacon[0]), int.Parse(beacon[1]))
+            );
         }
 
         var minSX = _sensors.Keys.Min(x => x.X);
@@ -40,26 +50,57 @@ public class Day15
         var maxSY = _sensors.Keys.Max(x => x.Y);
         var maxBY = _sensors.Values.Max(x => x.Y);
 
-        var xSize = Math.Max(maxBX, maxSX) - Math.Min(minBX, minSX);
-        var ySize = Math.Max(maxBY, maxSY) - Math.Min(minBY, minSY);
+        var xSize = 2 + Math.Max(maxBX, maxSX) - Math.Min(minBX, minSX);
+        var ySize = 2 + Math.Max(maxBY, maxSY) - Math.Min(minBY, minSY);
 
-        _map = new Map<char>(xSize, ySize, 0, 0, '.');
-        foreach(var s in _sensors)
+        Origin = new Point(xSize, ySize);
+        _map = new Map<char>(xSize*4, ySize*4, 2 * xSize , 2 * ySize, Empty);
+        _map.AutoCorrection = false;
+        _map.Margin = true;
+
+        foreach (var s in _sensors)
         {
-            //deltaX, delta Y = range
-            //blot out range
+            var sensor = s.Key;
+
+            var beacon = s.Value;
+
+            var range = Distance(sensor, beacon);
+
+            for (var x = sensor.X - range; x <= sensor.X + range; x++)
+            {
+                for (var y = sensor.Y - range; y <= sensor.Y + range; y++)
+                {
+                    var coord = new Point(x, y);
+                    if (Distance(sensor, coord) <= range)
+                    {
+                        _map[coord] = InSensorRange;
+                    }
+                }
+            }
         }
+
+        foreach (var s in _sensors)
+        {
+            var sensor = s.Key;
+            var beacon = s.Value;
+            _map[sensor] = Sensor;
+            _map[beacon] = Beacon;
+
+        }
+        var item = _map.Row(7);
     }
 
-    private bool BeaconBetween(Point a, Point b)
+    private int Distance(Point from, Point to)
     {
-        return _sensors.Values.Any(b => b.X )
+        return Math.Abs(to.X - from.X) + Math.Abs(to.Y - from.Y);
     }
 
-    public int Day15Part1(string input)
+    public int Day15Part1(string input, int row)
     {
         Parse(input);
-
+        var r = _map.Row(Origin.Y + row);
+        return r.Count(x => x != Empty);
+        // ..####B######################..
     }
 
     public int Day15Part2(string input)

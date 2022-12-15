@@ -1,4 +1,4 @@
-using AdventOfCode;
+﻿using AdventOfCode;
 
 namespace Tests;
 
@@ -15,14 +15,14 @@ public class Tests15
     [Test]
     public void Day15Part1_Example()
     {
-        var result = day15.Day15Part1(Input.Day15Example);
-        result.Should().Be(10605);
+        var result = day15.Day15Part1(Input.Day15Example, 10);
+        result.Should().Be(26);
     }
 
     [Test]
     public void Day15Part1()
     {
-        var result = day15.Day15Part1(Input.Day15Input);
+        var result = day15.Day15Part1(Input.Day15Input, 2000000);
         result.Should().Be(56120);
     }
 
