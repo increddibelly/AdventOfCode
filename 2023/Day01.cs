@@ -10,6 +10,7 @@ public class Program
 pqr3stu8vwx
 a1b2c3d4e5f
 treb7uchet";
+		
 		var test2 = @"two1nine
 eightwothree
 abcone2threexyz
@@ -26,11 +27,32 @@ zoneight234
 		
 		Console.WriteLine(result);
 	}
-	
+		
 	private static IEnumerable<int> OnlyNumbers(string input) {
 		return input
 			.Where(x => int.TryParse(x.ToString(), out var _))
 			.Select(x => int.Parse(x.ToString()));
+	}
+	
+	private static IEnumerable<int> Parse(string input) {
+		var numbers = new [] {
+			"one", "two", "three", "four", "five", "six", "seven", "eight", "nine"
+		};
+		var i=1;
+		var map = numbers.ToDictionary(n =>n, n=> i++);
+		
+		for(var index = 0; index<input.Length; index++) 
+		{
+			if (int.TryParse(input[index].ToString(), out var nr))
+			{
+				yield return nr;
+			}
+			var match = numbers.FirstOrDefault(name => input[index..].StartsWith(name));
+			if (match != null) 
+			{
+				yield return map[match];
+			}
+		}
 	}
 	
 	private static IEnumerable<int> OnlySmartNumbers(string input, bool first = true) {
@@ -68,7 +90,9 @@ zoneight234
 	}
 	
 	private static int GetNumber(string input) {
-		return 10 * OnlySmartNumbers(input, true).First() + OnlySmartNumbers(input, false).Last();
+		var nrs = Parse(input);
+		
+		return 10 * nrs.First() + nrs.Last();
 	}
 	
 	private static string source = @"five8b
