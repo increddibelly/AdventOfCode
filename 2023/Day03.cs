@@ -45,7 +45,7 @@ public class Program
 		var typemap = sb.ToString();
 		Console.WriteLine(input);
 		Console.WriteLine();
-		Console.WriteLine(typemap);
+		//Console.WriteLine(typemap);
 		Console.WriteLine();
 		
 		var connected = typemap.Replace(Environment.NewLine, "").ToCharArray(); // copy the data
@@ -84,14 +84,17 @@ public class Program
 		
 		Console.WriteLine(connectionMap);
 		
-		var map = connectionMap.Replace("S", ".");
+		var map = connectionMap
 		// dirty smack the unused numbers out
-			map = map.Replace($".NNNNNN.", "........")
-				.Replace($".NNNNN.", ".......")
-				.Replace($".NNNN.", "......")
-				.Replace($".NNN.", ".....")
-				.Replace($".NN.", "....")
-				.Replace($".N.", "...");
+			.Replace($".N.", "...")
+			.Replace($".NN.", "....")
+			.Replace($".NNN.", ".....")
+			.Replace($".NNN.", ".....")
+			.Replace($".NNN"+Environment.NewLine, "...."+Environment.NewLine)
+			.Replace($".NN"+Environment.NewLine, "..."+Environment.NewLine)
+			.Replace($".N"+Environment.NewLine, ".."+Environment.NewLine)
+			.Replace((Environment.NewLine+"NNN."), (Environment.NewLine+"...."));
+		// linestarts
 		
 		Console.WriteLine(map);
 		var nrs = new StringBuilder();
