@@ -151,6 +151,11 @@ public class Adapter
         }
     }
 
+    public override string ToString()
+    {
+        return $"{Source} to {Destination} maps {SourceStart}-{SourceEnd} to {DestinationStart}-{DestinationEnd}";
+    }
+
     public long Convert(long input)
     {
         if (input < SourceStart)
