@@ -1,10 +1,12 @@
+using NUnit.Framework;
+
 namespace Day07;
 
 public enum HandStrength
 {
     HighCard,
     OnePair,
-    TwoPair,
+    TwoPairs,
     ThreeOfAKind,
     FullHouse,
     FourOfAKind,
@@ -15,11 +17,39 @@ public static class Game
 {
     public static long Run(string input, bool allowJokers = false)
     {
-        var hands = input.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).Select(line => Hand.Parse(line, allowJokers)).ToList();
-        hands.Sort();
+        var hands = input.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries)
+            .ToDictionary(line => line, line => Hand.Parse(line, allowJokers));
+        var sorted = hands.Values.ToList();
+        sorted.Sort();
+
+        foreach(var hand in sorted)
+        {
+            var jokers = allowJokers ? hand.Jokers : 0;
+            var cards = hand.Faces.GroupBy(c => c).ToDictionary(c => c, c => c.Count());
+            if (jokers == 1)
+            {
+                Assert.That(hand.Strength >= HandStrength.OnePair);
+            }
+            if (jokers == 2)
+            {
+                Assert.That(hand.Strength >= HandStrength.TwoPairs);
+            }
+            if (cards.Keys.Count < 3)
+            {
+                if (jokers > 0)
+                {
+                    Assert.That(hand.Strength >= HandStrength.ThreeOfAKind);
+                    if (cards.Count < 2)
+                    {
+                        Assert.That(hand.Strength >= HandStrength.FourOfAKind);
+                    }
+                }
+            }
+        }
+        
 
         var i = 1;
-        var result = hands.Sum(hand => i++ * hand.Bid);
+        var result = sorted.Sum(hand => i++ * hand.Bid);
         return result;
     }
 }
@@ -30,6 +60,10 @@ public class Hand : IComparable<Hand>
     public Card[] Cards { get; set; }
 
     public HandStrength Strength { get; private set; }
+
+    public int Jokers => Cards.Count(c => c.Face == 'J');
+
+    public string Faces => new string(Cards.Select(c => c.Face).ToArray());
 
     private HandStrength GetStrength(bool allowJokers = false)
     {
@@ -42,6 +76,9 @@ public class Hand : IComparable<Hand>
         if (allowJokers)
         {
             jokersRemaining = sets.ContainsKey('J') ? sets['J'] : 0;
+            if (jokersRemaining == 5)
+                return HandStrength.FiveOfAKind; // bastards
+
             sets.Remove('J');
         }
 
@@ -60,7 +97,7 @@ public class Hand : IComparable<Hand>
         if (triplets.Any())
         {
             // this can only be true for a full house
-            if (sets.Count() == 2 && sets.Sum(s => s.Value) == 5 - jokersRemaining) //.Any(s => s.Value == 2 - jokersRemaining))
+            if (sets.Count() == 2 && sets.Sum(s => s.Value) == 5 - jokersRemaining)
             {
                 return HandStrength.FullHouse;
             }
@@ -71,10 +108,8 @@ public class Hand : IComparable<Hand>
 
         var pairs = sets.Where(s => s.Value == 2).Count();
         if (pairs + jokersRemaining >= 2)
-            //|| (pairs == 1 && jokersRemaining >= 1) || (pairs == 0 && jokersRemaining >= 2))
-            //sets.Where(x => x.Value + jokersRemaining >= 2).Count() == 2 || jokersRemaining >= 2)
         {
-            return HandStrength.TwoPair;
+            return HandStrength.TwoPairs;
         }
         if (pairs + jokersRemaining >= 1)
         {
@@ -86,8 +121,7 @@ public class Hand : IComparable<Hand>
 
     public override string ToString()
     {
-        var cards = new string (Cards.Select(c => c.Face).ToArray());
-        return $"{cards} : {Strength}";        
+        return $"{Faces} : {Strength}";        
     }
 
     public static Hand Parse (string input, bool allowJokers = false)
