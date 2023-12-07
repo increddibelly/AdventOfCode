@@ -13,9 +13,9 @@ public enum HandStrength
 
 public static class Game
 {
-    public static long Run(string input)
+    public static long Run(string input, bool allowJokers = false)
     {
-        var hands = input.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).Select(Hand.Parse).ToList();
+        var hands = input.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).Select(line => Hand.Parse(line, allowJokers)).ToList();
         hands.Sort();
 
         var i = 1;
@@ -31,41 +31,36 @@ public class Hand : IComparable<Hand>
 
     public HandStrength Strength { get; private set; }
 
-    private HandStrength GetStrength()
+    private HandStrength GetStrength(bool allowJokers = false)
     {
-        var i = 0;
-        var sameFace = Cards
-            .Select(card => Cards.Where(other => card.Face == other.Face).ToArray())
-            .ToDictionary(c => i++);
         // how many pairs?
-        i = 0;
         var sets = Cards
             .GroupBy(c => c.Face)
             .ToDictionary(x => x.Key, x => x.Count());
 
-        // decrease when used
-        var jokersRemaining = sets.Where(s => s.Key == 'J').Count();
+        var jokersRemaining = 0;
+        if (allowJokers)
+        {
+            jokersRemaining = sets.ContainsKey('J') ? sets['J'] : 0;
+            sets.Remove('J');
+        }
 
-        // index is irrelevant
-        if (sets.Any(s => s.Value == 5))
+        if (sets.Any(s => s.Value == 5 - jokersRemaining))
         {
             return HandStrength.FiveOfAKind;
         }
 
-        // ignore specific card index
-        if (sets.Any(s => s.Value == 4))
-        //if (sameFace.Any(m => m.Value.Length == 4))
+        if (sets.Any(s => s.Value == 4 - jokersRemaining))
         {
             return HandStrength.FourOfAKind;
         }
 
         // fullhouse?
-        if (sets.Any(s => s.Value == 3))
-        //if (sameFace.Any(m => m.Value.Length == 3))
+        var triplets = sets.Where(s => s.Value == 3 - jokersRemaining);
+        if (triplets.Any())
         {
             // this can only be true for a full house
-            if (sets.Any(s => s.Value == 2))
-            if (sameFace.Any(m => m.Value.Length == 2))
+            if (sets.Count() == 2 && sets.Sum(s => s.Value) == 5 - jokersRemaining) //.Any(s => s.Value == 2 - jokersRemaining))
             {
                 return HandStrength.FullHouse;
             }
@@ -74,29 +69,17 @@ public class Hand : IComparable<Hand>
             return HandStrength.ThreeOfAKind;
         }
 
-        if (sets.Count == 2)
+        var pairs = sets.Where(s => s.Value == 2).Count();
+        if (pairs + jokersRemaining >= 2)
+            //|| (pairs == 1 && jokersRemaining >= 1) || (pairs == 0 && jokersRemaining >= 2))
+            //sets.Where(x => x.Value + jokersRemaining >= 2).Count() == 2 || jokersRemaining >= 2)
         {
             return HandStrength.TwoPair;
         }
-        if (sets.Count == 1)
+        if (pairs + jokersRemaining >= 1)
         {
             return HandStrength.OnePair;
         }
-
-        //if (sameFace[0].Length == 2)
-        //{
-        //    if (sameFace
-        //            .Where(c => c.Value.Length == 2)
-        //            .Where(c => c.Value.All(o => o.Face != sameFace[0].First().Face))
-        //        .Any())
-        //    {
-        //        return HandStrength.TwoPair;
-        //    }
-        //    else
-        //    {
-        //        return HandStrength.OnePair;
-        //    }
-        //}
 
         return HandStrength.HighCard;
     }
@@ -107,16 +90,17 @@ public class Hand : IComparable<Hand>
         return $"{cards} : {Strength}";        
     }
 
-    public static Hand Parse (string input)
+    public static Hand Parse (string input, bool allowJokers = false)
     {
         var parts = input.Split(" ", StringSplitOptions.RemoveEmptyEntries);
         var hand = new Hand
         {
             Bid = int.Parse(parts[1]),
-            Cards = parts[0].Select(Card.Parse).ToArray(),
+            Cards = parts[0].Select(c => Card.Parse(c, allowJokers)).ToArray(),
         };
-        hand.Strength = hand.GetStrength();
-        Console.WriteLine(hand);
+        hand.Strength = hand.GetStrength(allowJokers);
+        if (input.Contains('J'))
+            Console.WriteLine(hand);
         return hand;
     }
 
@@ -141,7 +125,7 @@ public class Hand : IComparable<Hand>
     }
 }
 
-public class Card : IComparable<Card>
+public class Card
 {
     public static Dictionary<char, int> Values = new Dictionary<char, int> {
         { 'A', 14},
@@ -157,23 +141,22 @@ public class Card : IComparable<Card>
         { '4', 4},
         { '3', 3},
         { '2', 2},
-        { 'J', 1}
     };
 
     public char Face { get; private set; }
     public int Value => Values[Face];
 
-    public static Card Parse(char input)
+    public static Card Parse(char input, bool allowJokers = false)
     {
+        if (allowJokers)
+            Values['J'] = 1;
+        else
+            Values['J'] = 11;
+
         return new Card
         {
             Face = input
         };
-    }
-
-    public int CompareTo(Card? other)
-    {
-        return other!.Value.CompareTo(Value);
     }
 }
 
