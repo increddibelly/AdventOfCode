@@ -30,8 +30,6 @@ public class Program
 		Path = lines[0];
 		
 		Console.WriteLine($"{Path}");
-		Console.WriteLine($"Nodes: {Nodes.Count}");
-		Console.WriteLine($"Anodes: {Nodes.Count(n => n.Value.Label.EndsWith('A'))}");
 	}
 	
 	private static int GCD(params BigInteger[] steps)
@@ -40,26 +38,29 @@ public class Program
 		for(var i = 0; i < steps.Length-1; i++) {
 			var gcd = BigInteger.GreatestCommonDivisor(steps[i], steps[i+1]);
 			gcds.Add(gcd);
-			Console.WriteLine($"{steps[i]} / {steps[i+1]} => {gcd}");
 		}
 		var remaining = gcds.Distinct().ToArray();
-		Console.WriteLine($"{remaining.Count()} items remaining");
 		if (remaining.Count() > 1)
 			return GCD(remaining);
 		return (int)remaining.Single();
 	}
 	
-	public static int Run2(string input)
+	public static long Run2(string input)
 	{
 		Parse(input);
 
 		var starts = Nodes.Where(n => n.Key.EndsWith('A')).ToArray();
-		Console.WriteLine(starts.Length);
 		
-		var steps = starts.Select(start => RunForNode(start.Value, node => node.Label.EndsWith("Z"))).ToArray();
-		
+		var steps = starts.Select(start => RunForNode(start.Value, node => node.Label.EndsWith("Z"))).OrderBy(x => x).ToArray();
 		var gcd = GCD(steps.Select(i => (BigInteger)i).ToArray());
-		return steps.Max() * gcd;
+		long result = gcd;
+		
+		var factors = steps.Select(step => step / gcd).ToArray();
+		for(var i = 0; i < steps.Length; i++)
+		{
+			result *= factors[i];
+		}	
+		return (long)result;
 	}
 	
 	public static int RunForNode(Node node, Func<Node, bool> endCondition)
