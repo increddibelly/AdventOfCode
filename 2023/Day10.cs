@@ -2,96 +2,144 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 
+var map = Map.Parse(Day10Data.Task);
+map.GetDistances();
 
+Console.WriteLine(map.Max());
 
 public class Map
 {
-	private List<List<int>> _distanceFromStart = new List<List<int>>();
+    private List<List<int>> _distanceFromStart = new List<List<int>>();
     private List<List<Pipe>> _pipes = new List<List<Pipe>>();
-	
+
     private Pipe _start { get; set; }
-    
-	public static Map Parse(string input)
+    public int Width { get; private set; }
+    public int Height { get; private set; }
+
+    private Map() { }
+
+    public static Map Parse(string input)
     {
         var map = new Map();
         var lines = input.Split(Environment.NewLine);
-        var width = lines[0].Length;
-		for(var y =0; y < lines.Length; y++)
+        map.Width = lines[0].Length;
+        map.Height = lines.Length;
+        for (var y = 0; y < map.Height; y++)
         {
             map._pipes.Add(new List<Pipe>());
-			map._distanceFromStart.Add(Enumerable.Repeat(-1, width).ToList());
-			
-            for(var x = 0; x < lines[y].Length; x++)
+            map._distanceFromStart.Add(Enumerable.Repeat(-1, map.Width).ToList());
+
+            for (var x = 0; x < lines[y].Length; x++)
             {
-                var pipe = Pipe.Parse(lines[y][x], x, y);
+                var p = lines[y][x];
+                var pipe = Pipe.Parse(p, x, y);
                 if (pipe.IsStart)
                     map._start = pipe;
 
+
+                Console.WriteLine(pipe);
                 map._pipes[y].Add(pipe);
             }
         }
+        map.GetStartPipeType();
         return map;
     }
-  
+
     private IEnumerable<Pipe> GetAdjacent(Pipe pipe)
     {
-		var x = pipe.X;
-		var y = pipe.Y;
-		yield return _pipes[y-1][x];
-		yield return _pipes[y][x-1];
-		yield return _pipes[y][x+1];
-		yield return _pipes[y+1][x];
+        var x = pipe.X;
+        var y = pipe.Y;
+        if (y >= 1)
+            yield return _pipes[y - 1][x];
+        if (x >= 1)
+            yield return _pipes[y][x - 1];
+        if (x < Width - 1)
+            yield return _pipes[y][x + 1];
+        if (y < Height - 1)
+            yield return _pipes[y + 1][x];
     }
 
-	public int GetDistance(Pipe pipe)
-	{
-		if (_distances[pipe.Y][pipe.X]) {}
-	}
-			
-	public void GetStartPipeType()
-	{
-		var adja = GetAdjacent(_start);
-		var above = adja.SingleOrDefault(p => p.X == _start.X && p.Y == _start.Y-1);
-		var left = 
-	}
-
-    public int GetDistances()
+    public int Max()
     {
-		var currentPipe = _start;
-		do {
-			var pipes = GetAdjacent(currentPipe);(
-			}
-			foreach(var pipe in pipes)
-			{
-				if (currentpipe.ConnectsTo(pipe))
-				{
-					// they connect, pipe has one step more than currentPipe.
-				}
-					
-			}
-		} while (currentPipe != null);
+        return _distanceFromStart.SelectMany(d => d).Max();
+    }
+
+    public void GetStartPipeType()
+    {
+        var adja = GetAdjacent(_start);
+        foreach (var a in adja)
+        {
+            if (a.Label == '.')
+                continue;
+            if (a.GoesLeft && a.Y == _start.Y && a.X == _start.X + 1)
+            {
+                _start.GoesRight = true;
+            }
+            if (a.GoesRight && a.Y == _start.Y && a.X == _start.X - 1)
+            {
+                _start.GoesLeft = true;
+            }
+            if (a.GoesUp && a.X == _start.X && a.Y == _start.Y + 1)
+            {
+                _start.GoesDown = true;
+            }
+            if (a.GoesDown && a.X == _start.X && a.Y == _start.Y - 1)
+            {
+                _start.GoesUp = true;
+            }
+        }
+
+    }
+
+    public void GetDistances()
+    {
+        var currentPipe = _start;
+        var currentDistance = 1;
+        var pipesToDo = GetAdjacent(currentPipe).Where(p => p.ConnectsTo(currentPipe));
+        do
+        {
+            var nextPipes = new List<Pipe>();
+            foreach (var pipe in pipesToDo)
+            {
+                var pipes = SetDistanceFor(pipe, currentDistance);
+                nextPipes.AddRange(pipes);
+            }
+            pipesToDo = nextPipes;
+            currentDistance++;
+        } while (pipesToDo.Any());
+    }
+
+    public IEnumerable<Pipe> SetDistanceFor(Pipe pipe, int distance)
+    {
+        if (_distanceFromStart[pipe.Y][pipe.X] < 0)
+            _distanceFromStart[pipe.Y][pipe.X] = distance;
+
+        return GetAdjacent(pipe)
+            .Where(p => p.ConnectsTo(pipe))
+            .Where(p => _distanceFromStart[p.Y][p.X] < 0);
     }
 }
 
 public class Pipe
 {
-    private char _input;
     public bool IsStart { get; private set; }
 
-    public bool GoesUp { get; private set; }
-    public bool GoesDown { get; private set; }
-    public bool GoesLeft { get; private set; }
-    public bool GoesRight { get; private set; }
+    public char Label { get; private set; }
+    public bool GoesUp { get; set; }
+    public bool GoesDown { get; set; }
+    public bool GoesLeft { get; set; }
+    public bool GoesRight { get; set; }
     public int X { get; private set; }
     public int Y { get; private set; }
-	
-	public bool ConnectsTo(Pipe other) {
-		if (GoesUp    && other.X == X   && other.Y == Y-1) return true;
-		if (GoesDown  && other.X == X   && other.Y == Y+1) return true;
-		if (GoesLeft  && other.X == X-1 && other.Y == Y) return true;
-		if (GoesRight && other.X == X+1 && other.Y == Y) return true;
-		return false;
-	}
+
+    public bool ConnectsTo(Pipe other)
+    {
+        if (GoesUp && other.X == X && other.Y == Y - 1 && other.GoesDown) return true;
+        if (GoesDown && other.X == X && other.Y == Y + 1 && other.GoesUp) return true;
+        if (GoesLeft && other.X == X - 1 && other.Y == Y && other.GoesRight) return true;
+        if (GoesRight && other.X == X + 1 && other.Y == Y && other.GoesLeft) return true;
+        return false;
+    }
 
     public static Pipe Parse(char input, int x, int y)
     {
@@ -104,11 +152,10 @@ public class Pipe
         F is a 90-degree bend connecting south and east.
         . is ground; there is no pipe in this tile.
         S is the starting position of the animal; */
-
         return new Pipe
         {
-            _input = input,
             IsStart = input == 'S',
+            Label = input,
             GoesLeft = "-J7".Contains(input),
             GoesRight = "LF-".Contains(input),
             GoesUp = "|LJ".Contains(input),
@@ -117,13 +164,27 @@ public class Pipe
             Y = y
         };
     }
+
+    public override string ToString()
+    {
+        return $"{Label} @ {X},{Y} => {(GoesUp ? "^" : "")} {(GoesDown ? "v" : "")} {(GoesLeft ? "<" : "")} {(GoesRight ? ">" : "")}";
+    }
 }
-			
-			
-static class Data
+
+
+static class Day10Data
 {
-	public static string Test = @"";
-	public static string Task = @"LF-|7F-7.F--7---F7-J-F77.FLF7FF|---J-7-L-J7.F7.-.FF|7|7J7-L7.-F7|.|.F|-F-|7.---777L7-.FF77|77F7.|.FF777FJ.-L-|--7FF.F|-|--|--L.L-|F|-FJ7-JF|
+    public static string Test = @".....
+.S-7.
+.|.|.
+.L-J.
+.....";
+    public static string Test2 = @"..F7.
+.FJ|.
+SJ.L7
+|F--J
+LJ...";
+    public static string Task = @"LF-|7F-7.F--7---F7-J-F77.FLF7FF|---J-7-L-J7.F7.-.FF|7|7J7-L7.-F7|.|.F|-F-|7.---777L7-.FF77|77F7.|.FF777FJ.-L-|--7FF.F|-|--|--L.L-|F|-FJ7-JF|
 LL7L77-J-J|L7F|FJLJJLFL--7|F--7--L7L-J.||7FJ.|-|.F7LFLJL7..7JLLJLFJF7|7|FF77-L||J-F|.F77--F.7L-7|7FLJF-FJ-||-|7|LLJF-L7|J.L7.|7..|7||LJL-7L7
 .F|-LJ-|---LJ-J--7---|F|.|L.L|J.LFL.LLJ-7-|LL--JJFF7JL77LJ-|.FF|L7FJ.FJ|F|L-7J||J.|L7LJJ77|F|.L|J-FJF7LLF-7JFLJ|.L-J7-L-7F-7-77FLJFJLJL7--J|
 -7|F|J7F7J7-77L|.-FJ-FLJL-..L||F--|7..LJ|L|-|JFL-7||F7|J-|F7.FF7-F7L-FF--JF-JFF7--F777-FJ7.F77-J|FL--|.JLLLJ|.LJ-77LL7|7F77LF7L-|-L.|-F|LJ|L
